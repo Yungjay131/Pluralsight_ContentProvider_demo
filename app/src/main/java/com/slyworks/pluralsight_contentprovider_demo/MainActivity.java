@@ -49,6 +49,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		btnQueryRowById.setOnClickListener(this);
 		btnDisplayAll.setOnClickListener(this);
 
+
+		//to connect to SQLiteDatabase
 		databaseHelper = new NationDbHelper(this);
 		database = databaseHelper.getWritableDatabase();		// READ/WRITE
 	}
