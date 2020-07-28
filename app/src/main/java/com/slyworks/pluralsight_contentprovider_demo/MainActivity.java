@@ -1,8 +1,10 @@
 package com.slyworks.pluralsight_contentprovider_demo;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -23,7 +25,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 	private static final String TAG = MainActivity.class.getSimpleName();
 
 	private SQLiteDatabase database;
-	private NationDbHelper databaseHelper;
+
+	//now using ContentProvider
+	//private NationDbHelper databaseHelper;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +55,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 		//to connect to SQLiteDatabase
-		databaseHelper = new NationDbHelper(this);
-		database = databaseHelper.getWritableDatabase();		// READ/WRITE
+		//now using ContentProvider, hence these are not needed
+		//databaseHelper = new NationDbHelper(this);
+		//database = databaseHelper.getWritableDatabase();		// READ/WRITE
 	}
 
 	@Override
@@ -91,8 +96,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		contentValues.put(NationEntry.COLUMN_COUNTRY, countryName);
 		contentValues.put(NationEntry.COLUMN_CONTINENT, continentName);
 
-		long rowId = database.insert(NationEntry.TABLE_NAME, null, contentValues);
-		Log.i(TAG, "Items inserted in table with row id: " + rowId);
+		//no longer necessary because of contentProvider,instead using contentProvider
+		//subclass - NationProvider's insert method
+		//long rowId = database.insert(NationEntry.TABLE_NAME, null, contentValues);
+		//Log.i(TAG, "Items inserted in table with row id: " + rowId);
+
+	//adding to db, by sending to ContentProvider class
+		Uri uri = NationEntry.CONTENT_URI;
+		Uri uriRowInserted = getContentResolver().insert(uri,contentValues);
+	    Log.e(TAG, "Items inserted at: "+ uriRowInserted);
 	}
 
 	private void update() {
@@ -106,8 +118,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(NationEntry.COLUMN_CONTINENT, newContinent);
 
-		int rowsUpdated = database.update(NationEntry.TABLE_NAME, contentValues, selection, selectionArgs);
-		Log.i(TAG, "Number of rows updated: " + rowsUpdated);
+		//now handled in ContentProvider subclass
+		//int rowsUpdated = database.update(NationEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+		//Log.i(TAG, "Number of rows updated: " + rowsUpdated);
+
+		Uri uri = NationEntry.CONTENT_URI;
+		Log.e(TAG, ""+uri);
+	    int rowsUpdated =  getContentResolver().update(uri, contentValues,selection, selectionArgs);
+	    Log.e(TAG, "Number of rows updated: "+rowsUpdated);
 	}
 
 	private void delete() {
@@ -117,8 +135,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 		String selection = NationEntry.COLUMN_COUNTRY + " = ? ";
 		String[] selectionArgs = { countryName };		// WHERE country = "Japan"
 
-		int rowsDeleted = database.delete(NationEntry.TABLE_NAME, selection, selectionArgs);
-		Log.i(TAG, "Number of rows deleted: " + rowsDeleted);
+		//int rowsDeleted = database.delete(NationEntry.TABLE_NAME, selection, selectionArgs);
+		//Log.i(TAG, "Number of rows deleted: " + rowsDeleted);
+
+	    Uri uri = Uri.withAppendedPath(NationEntry.CONTENT_URI, countryName/*could be rowID*/);
+	    Log.e(TAG, ""+uri);
+	    int rowsDeleted = getContentResolver().delete(uri, selection, selectionArgs);
 	}
 
 	private void queryRowById() {
@@ -131,11 +153,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 				NationEntry.COLUMN_CONTINENT
 		};
 
+
 		// Filter results. Make these null if you want to query all rows
 		String selection = NationEntry._ID + " = ? ";	// _id = ?
 		String[] selectionArgs = { rowId };				// Replace '?' by rowId in runtime		// _id = 5
 
 		String sortOrder = null;	// Ascending or Descending ...
+
+		/*
+		no longer necessary being implemented in NationProvider
 
 		Cursor cursor = database.query(NationEntry.TABLE_NAME,		// The table name
 				projection,                 // The columns to return
@@ -144,6 +170,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 				null,                       // don't group the rows
 				null,                       // don't filter by row groups
 				sortOrder);					// The sort order
+        */
+//for ContentProvider
+		Uri uri = Uri.withAppendedPath(NationEntry.CONTENT_URI, rowId);
+
+		Cursor cursor = getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
+
 
 		if (cursor != null && cursor.moveToNext()) {
 
@@ -156,11 +188,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 			str += "\n";
 
 			cursor.close();
+			cursor.close();
 			Log.i(TAG, str);
 		}
 	}
 
 	private void queryAndDisplayAll() {
+
+
 
 		String[] projection = {
 				NationEntry._ID,
@@ -174,6 +209,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 		String sortOrder = null;	// Ascending or Descending ...
 
+		/*no longer used because of ContentProvider
+
 		Cursor cursor = database.query(NationEntry.TABLE_NAME,		// The table name
 				projection,                 // The columns to return
 				selection,                  // Selection: WHERE clause OR the condition
@@ -181,6 +218,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 				null,                       // don't group the rows
 				null,                       // don't filter by row groups
 				sortOrder);					// The sort order
+*/
+
+		//for ContentProvider
+		Uri uri = NationEntry.CONTENT_URI;
+		Log.e(TAG,""+uri);
+		Cursor cursor = getContentResolver().query(uri, projection, selection,selectionArgs, sortOrder);
 
 		if (cursor != null) {
 
@@ -195,7 +238,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 			}
 
 			cursor.close();
-			Log.i(TAG, str);
+			Log.e(TAG, str);
+
+			//adding intent to open NationListActivity
+			Intent intent = new Intent(this, NationListActivity.class);
+			startActivity(intent);
 		}
 	}
 

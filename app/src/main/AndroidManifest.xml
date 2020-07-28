@@ -16,6 +16,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--adding newly added activities-->
+        <activity android:name=".NationEditActivity"/>
+        <activity android:name=".NationListActivity"/>
+
+
+        <!-- declaring contentProvider authority,"exported false" implies no other
+         app could access the apps database-->
+        <provider
+            android:authorities="com.slyworks.pluralsight_contentprovider_demo.data.NationProvider"
+            android:name=".data.NationProvider"
+            android:exported="false">
+        </provider>
+
     </application>
 
 </manifest>
