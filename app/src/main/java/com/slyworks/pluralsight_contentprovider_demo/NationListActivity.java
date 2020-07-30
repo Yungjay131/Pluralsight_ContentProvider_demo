@@ -42,10 +42,10 @@ public class NationListActivity extends AppCompatActivity implements LoaderManag
 		//LoaderManager.getInstance(this);
 
 		//old, deprecated way
-		//LoaderManager.LoaderCallbacks<Cursor> obj = new NationListActivity();
+		LoaderManager.LoaderCallbacks<Cursor> obj = new NationListActivity();
 		/*getSupportLoader*/
-		//getLoaderManager().initLoader(10, null, this);
-		androidx.loader.app.LoaderManager.getInstance(this);
+		getLoaderManager().initLoader(10, null, this);
+		//androidx.loader.app.LoaderManager.getInstance(this);
 
 
 		String[] from = {NationContract.NationEntry.COLUMN_COUNTRY, NationContract.NationEntry.COLUMN_CONTINENT};
@@ -58,28 +58,26 @@ public class NationListActivity extends AppCompatActivity implements LoaderManag
 		listView.setAdapter(simpleCursorAdapter);
 
 	//setting Listener on listView
-		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		/*(parent,view,position,id)->*/
+		listView.setOnItemClickListener((parent, view, position, id) -> {
 
-	//each row defines a Cursor Object
-				cursor = (Cursor)parent.getItemAtPosition(position);
+//each row defines a Cursor Object
+			cursor = (Cursor)parent.getItemAtPosition(position);
 
-				int _id = cursor.getInt(cursor.getColumnIndex(NationContract.NationEntry._ID));
-				String country = cursor.getString(cursor.getColumnIndex(NationContract.NationEntry.COLUMN_COUNTRY));
-				String continent = cursor.getString(cursor.getColumnIndex(NationContract.NationEntry.COLUMN_CONTINENT));
+			int _id = cursor.getInt(cursor.getColumnIndex(NationContract.NationEntry._ID));
+			String country = cursor.getString(cursor.getColumnIndex(NationContract.NationEntry.COLUMN_COUNTRY));
+			String continent = cursor.getString(cursor.getColumnIndex(NationContract.NationEntry.COLUMN_CONTINENT));
 
-	//starting the NationEditActivity
-				Intent intent = new Intent(NationListActivity.this, NationEditActivity.class);
+//starting the NationEditActivity
+			Intent intent = new Intent(NationListActivity.this, NationEditActivity.class);
 
-	//passing details to next activity
-				intent.putExtra("_id", _id);
-				intent.putExtra("country", country);
-                intent.putExtra("continent", continent);
+//passing details to next activity
+			intent.putExtra("_id", _id);
+			intent.putExtra("country", country);
+intent.putExtra("continent", continent);
 
-                startActivity(intent);
+startActivity(intent);
 
-			}
 		});
 	}
 
@@ -107,7 +105,7 @@ public class NationListActivity extends AppCompatActivity implements LoaderManag
 	@Override
 	public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
 //called when the Loader has finished loading
-		simpleCursorAdapter.swapCursor(cursor);
+		simpleCursorAdapter.swapCursor(data);
 	}
 
 	@Override
